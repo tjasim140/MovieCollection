@@ -16,12 +16,25 @@ public class MovieCollection
         scanner = new Scanner(System.in);
         castList = new ArrayList<String>();
         for (Movie movie:movies){
-            String[] cast = movie.getCast().split("//|");
+            String[] cast = movie.getCast().split("\\|");
             for (String s : cast) {
                 if (!castList.contains(s)) {
                     castList.add(s.toLowerCase());
                 }
             }
+        }
+
+        for (int j = 1; j < castList.size(); j++)
+        {
+            String temp = castList.get(j);
+
+            int possibleIndex = j;
+            while (possibleIndex > 0 && temp.compareTo(castList.get(possibleIndex - 1)) < 0)
+            {
+                castList.set(possibleIndex, castList.get(possibleIndex - 1));
+                possibleIndex--;
+            }
+            castList.set(possibleIndex, temp);
         }
     }
 
@@ -149,6 +162,7 @@ public class MovieCollection
             String tempTitle = temp.getTitle();
 
             int possibleIndex = j;
+
             while (possibleIndex > 0 && tempTitle.compareTo(listToSort.get(possibleIndex - 1).getTitle()) < 0)
             {
                 listToSort.set(possibleIndex, listToSort.get(possibleIndex - 1));
@@ -181,21 +195,39 @@ public class MovieCollection
         ArrayList<String> results = new ArrayList<String>();
 
         for(String cast:castList){
-            if (cast.contains(castMember)){
+            if (cast.contains(castMember)&&!results.contains(cast)){
                 results.add(cast);
             }
         }
 
+        System.out.println(results);
+
+        for(int i=0; i<results.size();i++){
+            System.out.println((i+1)+". "+results.get(i));
+        }
+
+        System.out.print("Enter a # to learn more: ");
+        String more = scanner.nextLine();
+
+        String actor = results.get(Integer.parseInt(more)-1);
+
         ArrayList<Movie> resultsCast = new ArrayList<Movie>();
-        for(String cast:castList){
-            for(Movie movie:movies){
-                if(movie.getCast().contains(cast)){
+            for (Movie movie : movies) {
+                if (movie.getCast().toLowerCase().contains(actor.toLowerCase())) {
                     resultsCast.add(movie);
                 }
             }
+        sortResults(resultsCast);
+
+        for(int i=0; i<resultsCast.size();i++){
+            System.out.println(i+1+". "+resultsCast.get(i).getTitle());
         }
 
-        sortResults(resultsCast);
+        System.out.print("Enter a # to learn more: ");
+        int more2 = Integer.parseInt(scanner.nextLine());
+
+        displayMovieInfo(resultsCast.get(more2-1));
+
     }
 
 
