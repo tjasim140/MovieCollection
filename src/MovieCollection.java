@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class MovieCollection
@@ -9,6 +10,7 @@ public class MovieCollection
     private ArrayList<Movie> movies;
     private Scanner scanner;
     private ArrayList<String> castList;
+    private ArrayList<String> genreList;
 
     public MovieCollection(String fileName)
     {
@@ -23,18 +25,35 @@ public class MovieCollection
                 }
             }
         }
-
-        for (int j = 1; j < castList.size(); j++)
+        for (int j = 1; j < castList.size(); j++) {
+        String temp = castList.get(j);
+        int possibleIndex = j;
+        while (possibleIndex > 0 && temp.compareTo(castList.get(possibleIndex - 1)) < 0)
         {
-            String temp = castList.get(j);
-
+            castList.set(possibleIndex, castList.get(possibleIndex - 1));
+            possibleIndex--;
+        }
+        castList.set(possibleIndex, temp);
+        }
+        genreList = new ArrayList<String>();
+        for (Movie movie:movies) {
+            String[] genre = movie.getGenres().split("\\|");
+            for (String s : genre) {
+                if (!genreList.contains(s.toLowerCase())) {
+                    genreList.add(s.toLowerCase());
+                }
+            }
+        }
+        for (int j = 1; j < genreList.size(); j++)
+        {
+            String temp = genreList.get(j);
             int possibleIndex = j;
-            while (possibleIndex > 0 && temp.compareTo(castList.get(possibleIndex - 1)) < 0)
+            while (possibleIndex > 0 && temp.compareTo(genreList.get(possibleIndex - 1)) < 0)
             {
-                castList.set(possibleIndex, castList.get(possibleIndex - 1));
+                genreList.set(possibleIndex, genreList.get(possibleIndex - 1));
                 possibleIndex--;
             }
-            castList.set(possibleIndex, temp);
+            genreList.set(possibleIndex, temp);
         }
     }
 
@@ -200,8 +219,6 @@ public class MovieCollection
             }
         }
 
-        System.out.println(results);
-
         for(int i=0; i<results.size();i++){
             System.out.println((i+1)+". "+results.get(i));
         }
@@ -229,7 +246,6 @@ public class MovieCollection
         displayMovieInfo(resultsCast.get(more2-1));
 
     }
-
 
     private void searchKeywords()
     {
@@ -285,17 +301,91 @@ public class MovieCollection
 
     private void listGenres()
     {
+        for(int i=0;i<genreList.size();i++){
+            System.out.println(i+1+". "+genreList.get(i));;
+        }
+        System.out.print("Enter a # to learn more: ");
+        String more = scanner.nextLine();
 
+        String genre = genreList.get(Integer.parseInt(more)-1);
+
+        ArrayList<Movie> resultsGenre = new ArrayList<Movie>();
+        for (Movie movie : movies) {
+            if (movie.getGenres().toLowerCase().contains(genre.toLowerCase())) {
+                resultsGenre.add(movie);
+            }
+        }
+        sortResults(resultsGenre);
+
+        for(int i=0; i<resultsGenre.size();i++){
+            System.out.println(i+1+". "+resultsGenre.get(i).getTitle());
+        }
+
+        System.out.print("Enter a # to learn more: ");
+        int more2 = Integer.parseInt(scanner.nextLine());
+
+        displayMovieInfo(resultsGenre.get(more2-1));
     }
 
     private void listHighestRated()
     {
+        ArrayList<Double> ratings = new ArrayList<Double>();
+        for(Movie movie:movies){
+            ratings.add(movie.getUserRating());
+        }
+        ArrayList<Movie> results = new ArrayList<Movie>();
+        for (int i=0; i<50;i++) {
+            double greatest = 0.0;
+            for (double rating : ratings) {
+                if (rating > greatest) {
+                    greatest = rating;
+                }
+            }
+            for (Movie movie : movies) {
+                if (movie.getUserRating() == greatest && results.size()<50 && !results.contains(movie)) {
+                    results.add(movie);
+                }
+            }
+            ratings.remove(greatest);
+        }
+        for(int i=0;i<results.size();i++){
+            System.out.println(i+1+". "+results.get(i).getTitle()+" Rating: "+results.get(i).getUserRating());
+        }
 
+        System.out.print("Enter a # to learn more: ");
+        int more2 = Integer.parseInt(scanner.nextLine());
+
+        displayMovieInfo(results.get(more2-1));
     }
 
     private void listHighestRevenue()
     {
+        ArrayList<Double> revenues = new ArrayList<Double>();
+        for(Movie movie:movies){
+            revenues.add((double) movie.getRevenue());
+        }
+        ArrayList<Movie> results = new ArrayList<Movie>();
+        for (int i=0; i<50;i++) {
+            double greatest = 0.0;
+            for (Double revenue : revenues) {
+                if (revenue > greatest) {
+                    greatest = revenue;
+                }
+            }
+            for (Movie movie : movies) {
+                if (movie.getRevenue() == greatest && results.size()<50 && !results.contains(movie)) {
+                    results.add(movie);
+                }
+            }
+            revenues.remove(greatest);
+        }
+        for(int i=0;i<results.size();i++){
+            System.out.println(i+1+". "+results.get(i).getTitle()+" Revenue: "+results.get(i).getRevenue());
+        }
 
+        System.out.print("Enter a # to learn more: ");
+        int more2 = Integer.parseInt(scanner.nextLine());
+        displayMovieInfo(results.get(more2-1));
     }
 
     private void importMovieList(String fileName)
